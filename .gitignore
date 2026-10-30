@@ -1,0 +1,26 @@
+﻿# Other projects
+/scientific_calculator/
+/Silentrecording/
+
+# Python virtual environments
+.venv/
+venv/
+**/.venv/
+**/venv/
+
+# Secrets
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Generated and temporary files
+*.log
+.pytest_cache/
+.coverage

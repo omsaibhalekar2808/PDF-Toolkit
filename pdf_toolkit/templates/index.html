@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PDF Toolkit</title>
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --surface: #ffffff;
+    --text: #1d2330;
+    --muted: #667085;
+    --line: #e4e7ec;
+    --accent: #e5322d;
+    --accent-ink: #ffffff;
+    --accent-soft: #fdecea;
+    --ok: #12805c;
+    --shadow: 0 1px 2px rgba(16,24,40,.06), 0 4px 14px rgba(16,24,40,.06);
+    --c-org: #e5322d;  --c-opt: #5aa02c;  --c-to: #f59e0b;  --c-from: #2f7de1;
+    --c-edit: #8e44ad; --c-sec: #0f9fb0;  --c-ai: #4f46e5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12151c; --surface: #1b1f29; --text: #eef0f4; --muted: #9aa3b2;
+      --line: #2b3140; --accent-soft: #3a1f1f; --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 18px rgba(0,0,0,.35);
+    }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+
+  /* ---------- header ---------- */
+  header {
+    position: sticky; top: 0; z-index: 20;
+    background: var(--surface); border-bottom: 1px solid var(--line);
+  }
+  .bar {
+    max-width: 1180px; margin: 0 auto; padding: 12px 20px;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; text-decoration: none; color: var(--text); }
+  .logo i {
+    width: 32px; height: 32px; border-radius: 8px; background: var(--accent); color: #fff;
+    display: grid; place-items: center; font-style: normal; font-size: 13px; font-weight: 800;
+  }
+  .search { flex: 1; min-width: 200px; max-width: 420px; margin-left: auto; }
+  .search input {
+    width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--line);
+    background: var(--bg); color: var(--text); font: inherit;
+  }
+  .search input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .chips { max-width: 1180px; margin: 0 auto; padding: 0 20px 12px; display: flex; gap: 8px; overflow-x: auto; }
+  .chips a {
+    white-space: nowrap; padding: 6px 12px; border-radius: 999px; font-size: 13px; text-decoration: none;
+    color: var(--muted); border: 1px solid var(--line); background: var(--surface);
+  }
+  .chips a:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* ---------- hero + grid ---------- */
+  main { max-width: 1180px; margin: 0 auto; padding: 8px 20px 60px; }
+  .hero { text-align: center; padding: 36px 0 12px; }
+  .hero h1 { margin: 0 0 8px; font-size: clamp(26px, 4vw, 38px); letter-spacing: -.02em; }
+  .hero p { margin: 0; color: var(--muted); }
+
+  section { margin-top: 34px; scroll-margin-top: 130px; }
+  section h2 {
+    display: flex; align-items: center; gap: 10px; margin: 0 0 14px;
+    font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+  }
+  section h2::before { content: ""; width: 10px; height: 10px; border-radius: 3px; background: var(--c); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
+
+  .card {
+    text-align: left; font: inherit; color: inherit; cursor: pointer;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+    padding: 16px; display: flex; gap: 14px; align-items: flex-start;
+    transition: transform .12s, box-shadow .12s, border-color .12s;
+  }
+  .card:hover { transform: translateY(-2px); box-shadow: var(--shadow); border-color: var(--c); }
+  .card:focus-visible { outline: 2px solid var(--c); outline-offset: 2px; }
+  .tile {
+    flex: none; width: 42px; height: 42px; border-radius: 11px; color: #fff; background: var(--c);
+    display: grid; place-items: center; font-weight: 800; font-size: 13px; letter-spacing: .02em;
+  }
+  .card b { display: block; font-size: 15px; }
+  .card span { display: block; color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .empty { text-align: center; color: var(--muted); padding: 40px 0; display: none; }
+
+  /* ---------- dialog ---------- */
+  dialog {
+    width: min(640px, calc(100vw - 24px)); max-height: calc(100vh - 24px);
+    padding: 0; border: 0; border-radius: 18px; background: var(--surface); color: var(--text);
+    box-shadow: 0 24px 60px rgba(0,0,0,.35);
+  }
+  dialog::backdrop { background: rgba(10,14,22,.55); backdrop-filter: blur(2px); }
+  .dlg-head { display: flex; align-items: center; gap: 14px; padding: 18px 20px; border-bottom: 1px solid var(--line); }
+  .dlg-head h3 { margin: 0; font-size: 18px; }
+  .dlg-head p { margin: 0; color: var(--muted); font-size: 13px; }
+  .x {
+    margin-left: auto; border: 0; background: transparent; color: var(--muted); cursor: pointer;
+    font-size: 26px; line-height: 1; padding: 4px 8px; border-radius: 8px;
+  }
+  .x:hover { background: var(--bg); color: var(--text); }
+  .dlg-body { padding: 20px; overflow: auto; max-height: calc(100vh - 170px); }
+
+  .drop {
+    display: block;
+    border: 2px dashed var(--line); border-radius: 14px; padding: 26px 16px; text-align: center;
+    cursor: pointer; color: var(--muted); transition: .12s; background: var(--bg);
+  }
+  .drop:hover, .drop.over { border-color: var(--c); color: var(--text); background: color-mix(in srgb, var(--c) 8%, var(--bg)); }
+  .drop strong { color: var(--text); display: block; font-size: 15px; margin-bottom: 2px; }
+  .drop small { display: block; margin-top: 4px; }
+  .drop input { display: none; }
+  .label { font-size: 13px; font-weight: 600; margin: 16px 0 6px; display: block; }
+
+  ul.files { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 6px; }
+  ul.files li {
+    display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid var(--line);
+    border-radius: 10px; font-size: 13px; background: var(--surface);
+  }
+  ul.files li .n { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  ul.files li .s { color: var(--muted); font-size: 12px; }
+  .mini {
+    border: 1px solid var(--line); background: var(--bg); color: var(--text); border-radius: 7px;
+    width: 26px; height: 26px; cursor: pointer; font-size: 13px; line-height: 1;
+  }
+  .mini:hover { border-color: var(--accent); color: var(--accent); }
+
+  .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; margin-top: 6px; }
+  .fields .full { grid-column: 1 / -1; }
+  .fields h4 { grid-column: 1 / -1; margin: 12px 0 0; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+  .fields label { font-size: 13px; font-weight: 600; display: block; margin-bottom: 5px; }
+  .fields input[type=text], .fields input[type=number], .fields input[type=password],
+  .fields select, .fields textarea {
+    width: 100%; padding: 9px 11px; border-radius: 9px; border: 1px solid var(--line);
+    background: var(--bg); color: var(--text); font: inherit;
+  }
+  .fields textarea { min-height: 90px; resize: vertical; }
+  .fields input:focus, .fields select:focus, .fields textarea:focus { outline: 2px solid var(--c); outline-offset: 1px; }
+  .fields .hint { color: var(--muted); font-size: 12px; margin-top: 4px; }
+  .check { display: flex; gap: 10px; align-items: center; font-weight: 500 !important; }
+  .check input { width: 18px; height: 18px; accent-color: var(--c); }
+
+  .actions { display: flex; gap: 10px; align-items: center; margin-top: 22px; flex-wrap: wrap; }
+  .btn {
+    border: 0; cursor: pointer; font: inherit; font-weight: 700; color: #fff; background: var(--c);
+    padding: 12px 22px; border-radius: 11px; display: inline-flex; gap: 10px; align-items: center;
+  }
+  .btn:hover { filter: brightness(1.06); }
+  .btn[disabled] { opacity: .55; cursor: not-allowed; }
+  .btn.ghost { background: transparent; color: var(--text); border: 1px solid var(--line); font-weight: 600; }
+  .spin { width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(255,255,255,.4); border-top-color: #fff; animation: r .7s linear infinite; display: none; }
+  .busy .spin { display: inline-block; }
+  @keyframes r { to { transform: rotate(360deg); } }
+
+  .msg { margin-top: 16px; padding: 12px 14px; border-radius: 11px; font-size: 14px; display: none; }
+  .msg.err { display: block; background: #fdecea; color: #a4231f; border: 1px solid #f5c2bf; }
+  .msg.ok  { display: block; background: #e7f6ef; color: var(--ok); border: 1px solid #b7e4cf; }
+  @media (prefers-color-scheme: dark) {
+    .msg.err { background: #3a1f1f; color: #ffb4ae; border-color: #5a2b2b; }
+    .msg.ok  { background: #14301f; color: #7fe0b2; border-color: #1f4a31; }
+  }
+  .msg a { color: inherit; font-weight: 700; }
+  pre.out {
+    margin: 14px 0 0; padding: 14px; border-radius: 11px; border: 1px solid var(--line); background: var(--bg);
+    white-space: pre-wrap; word-wrap: break-word; font: 13px/1.55 ui-monospace, Menlo, Consolas, monospace;
+    max-height: 320px; overflow: auto; display: none;
+  }
+  .copy { margin-top: 8px; display: none; }
+
+  footer { text-align: center; color: var(--muted); font-size: 13px; padding: 10px 20px 40px; }
+
+  @media (max-width: 560px) {
+    .fields { grid-template-columns: 1fr; }
+    .bar { padding: 10px 16px; }
+    main { padding: 4px 16px 50px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="bar">
+    <a class="logo" href="#top"><i>PDF</i> PDF Toolkit</a>
+    <div class="search"><input id="q" type="search" placeholder="Search tools…  (e.g. merge, compress, word)" autocomplete="off"></div>
+  </div>
+  <nav class="chips" id="chips" aria-label="Categories"></nav>
+</header>
+
+<main id="top">
+  <div class="hero">
+    <h1>Every PDF tool you need</h1>
+    <p>Merge, convert, edit, protect and summarize PDFs. Files are processed on this server and deleted right after.</p>
+  </div>
+  <div id="sections"></div>
+  <p class="empty" id="empty">No tools match your search.</p>
+</main>
+
+<footer>PDF Toolkit · Flask + PyMuPDF + pypdf</footer>
+
+<dialog id="dlg">
+  <div class="dlg-head">
+    <div class="tile" id="dTile"></div>
+    <div><h3 id="dTitle"></h3><p id="dDesc"></p></div>
+    <button class="x" id="dClose" aria-label="Close">&times;</button>
+  </div>
+  <form class="dlg-body" id="form" autocomplete="off">
+    <div id="primary"></div>
+    <div id="extras"></div>
+    <div class="fields" id="fields"></div>
+    <div class="actions">
+      <button class="btn" id="run" type="submit"><span class="spin"></span><span id="runLbl">Run</span></button>
+      <button class="btn ghost" id="reset" type="button">Reset</button>
+    </div>
+    <div class="msg" id="msg"></div>
+    <pre class="out" id="out"></pre>
+    <button class="btn ghost copy" id="copy" type="button">Copy text</button>
+  </form>
+</dialog>
+
+<script>
+(() => {
+  const COLORS = {
+    "Organize PDF": "--c-org", "Optimize PDF": "--c-opt", "Convert to PDF": "--c-to",
+    "Convert from PDF": "--c-from", "Edit PDF": "--c-edit", "PDF Security": "--c-sec", "PDF Intelligence": "--c-ai"
+  };
+  const $ = (id) => document.getElementById(id);
+  const colorOf = (cat) => `var(${COLORS[cat] || "--accent"})`;
+  const slug = (s) => s.toLowerCase().replace(/[^a-z]+/g, "-");
+  const initials = (label) => {
+    const w = label.replace(/[^A-Za-z ]/g, "").split(" ").filter(Boolean);
+    return (w.length > 1 ? w[0][0] + w[1][0] : label.slice(0, 2)).toUpperCase();
+  };
+  const fmtSize = (n) => n < 1024 ? n + " B" : n < 1048576 ? (n / 1024).toFixed(0) + " KB" : (n / 1048576).toFixed(1) + " MB";
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  let DATA = { categories: [], tools: [] };
+  let current = null;       // active tool spec
+  let files = [];           // primary files
+  let extraFiles = {};      // extra single files
+
+  /* ---------------- home grid ---------------- */
+  function render(filter = "") {
+    const q = filter.trim().toLowerCase();
+    const host = $("sections");
+    host.innerHTML = "";
+    let shown = 0;
+    DATA.categories.forEach((cat) => {
+      const list = DATA.tools.filter((t) => t.category === cat &&
+        (!q || (t.label + " " + t.desc + " " + cat).toLowerCase().includes(q)));
+      if (!list.length) return;
+      shown += list.length;
+      const sec = document.createElement("section");
+      sec.id = slug(cat);
+      sec.style.setProperty("--c", colorOf(cat));
+      sec.innerHTML = `<h2>${esc(cat)}</h2><div class="grid"></div>`;
+      const grid = sec.querySelector(".grid");
+      list.forEach((t) => {
+        const b = document.createElement("button");
+        b.className = "card"; b.type = "button";
+        b.style.setProperty("--c", colorOf(cat));
+        b.innerHTML = `<div class="tile">${initials(t.label)}</div><div><b>${esc(t.label)}</b><span>${esc(t.desc)}</span></div>`;
+        b.onclick = () => openTool(t);
+        grid.appendChild(b);
+      });
+      host.appendChild(sec);
+    });
+    $("empty").style.display = shown ? "none" : "block";
+  }
+
+  function renderChips() {
+    $("chips").innerHTML = DATA.categories.map((c) => `<a href="#${slug(c)}">${esc(c)}</a>`).join("");
+  }
+
+  /* ---------------- dialog ---------------- */
+  const dlg = $("dlg");
+
+  function openTool(t) {
+    current = t; files = []; extraFiles = {};
+    dlg.style.setProperty("--c", colorOf(t.category));
+    $("dTile").textContent = initials(t.label);
+    $("dTitle").textContent = t.label;
+    $("dDesc").textContent = t.desc;
+    $("runLbl").textContent = t.label;
+    buildPrimary(); buildExtras(); buildFields(); clearResult();
+    dlg.showModal();
+  }
+
+  function buildPrimary() {
+    const t = current, host = $("primary");
+    const label = t.files_label || (t.multiple ? "Select files" : "Select file");
+    host.innerHTML = `
+      <span class="label" style="margin-top:0">${esc(label)}${t.files_required ? "" : ""}</span>
+      <label class="drop" id="drop">
+        <strong>Click to choose ${t.multiple ? "files" : "a file"}</strong>
+        or drag &amp; drop here
+        <small>${esc(t.accept.replace(/\./g, "").toUpperCase().replace(/,/g, ", "))}</small>
+        <input type="file" id="fileIn" accept="${esc(t.accept)}" ${t.multiple ? "multiple" : ""}>
+      </label>
+      <ul class="files" id="fileList"></ul>`;
+    const drop = $("drop"), input = $("fileIn");
+    input.onchange = () => { addFiles([...input.files]); input.value = ""; };
+    ["dragenter", "dragover"].forEach((e) => drop.addEventListener(e, (ev) => { ev.preventDefault(); drop.classList.add("over"); }));
+    ["dragleave", "drop"].forEach((e) => drop.addEventListener(e, (ev) => { ev.preventDefault(); drop.classList.remove("over"); }));
+    drop.addEventListener("drop", (ev) => addFiles([...ev.dataTransfer.files]));
+    drawFiles();
+  }
+
+  function addFiles(list) {
+    if (!list.length) return;
+    files = current.multiple ? files.concat(list) : [list[0]];
+    drawFiles(); clearResult();
+  }
+
+  function drawFiles() {
+    const ul = $("fileList");
+    ul.innerHTML = "";
+    files.forEach((f, i) => {
+      const li = document.createElement("li");
+      li.innerHTML = `<span class="n" title="${esc(f.name)}">${esc(f.name)}</span><span class="s">${fmtSize(f.size)}</span>`;
+      if (current.multiple && files.length > 1) {
+        li.append(btn("↑", "Move up", () => move(i, -1)), btn("↓", "Move down", () => move(i, 1)));
+      }
+      li.append(btn("✕", "Remove", () => { files.splice(i, 1); drawFiles(); }));
+      ul.appendChild(li);
+    });
+  }
+  function btn(txt, title, fn) {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "mini"; b.textContent = txt; b.title = title; b.onclick = fn;
+    return b;
+  }
+  function move(i, d) {
+    const j = i + d;
+    if (j < 0 || j >= files.length) return;
+    [files[i], files[j]] = [files[j], files[i]];
+    drawFiles();
+  }
+
+  function buildExtras() {
+    const host = $("extras");
+    host.innerHTML = "";
+    (current.extra || []).forEach((e) => {
+      const wrap = document.createElement("div");
+      wrap.innerHTML = `<span class="label">${esc(e.label)}${e.required ? " *" : ""}</span>
+        <input type="file" accept="${esc(e.accept)}" style="width:100%">`;
+      wrap.querySelector("input").onchange = (ev) => { extraFiles[e.name] = ev.target.files[0] || null; };
+      host.appendChild(wrap);
+    });
+  }
+
+  function buildFields() {
+    const host = $("fields");
+    host.innerHTML = "";
+    let lastGroup = null;
+    current.params.forEach((p) => {
+      if (p.group && p.group !== lastGroup) {
+        const h = document.createElement("h4"); h.textContent = p.group; host.appendChild(h);
+      }
+      lastGroup = p.group || lastGroup;
+      const wide = ["text", "textarea", "password"].includes(p.type) && !p.group && current.params.length < 3;
+      const d = document.createElement("div");
+      if (p.type === "textarea" || p.type === "checkbox" || wide) d.className = "full";
+      const id = "f_" + p.name;
+      let ctl = "";
+      const req = p.required ? "required" : "";
+      if (p.type === "select") {
+        ctl = `<select id="${id}" name="${p.name}">${p.options.map(([v, l]) =>
+          `<option value="${esc(v)}" ${String(v) === String(p.default) ? "selected" : ""}>${esc(l)}</option>`).join("")}</select>`;
+      } else if (p.type === "textarea") {
+        ctl = `<textarea id="${id}" name="${p.name}" placeholder="${esc(p.placeholder)}" ${req}></textarea>`;
+      } else if (p.type === "checkbox") {
+        d.innerHTML = `<label class="check"><input type="checkbox" name="${p.name}" ${p.default ? "checked" : ""}> ${esc(p.label)}</label>`;
+        host.appendChild(d); return;
+      } else if (p.type === "number") {
+        ctl = `<input id="${id}" name="${p.name}" type="number" value="${esc(p.default)}" step="${p.step ?? "any"}"
+                ${p.min != null ? `min="${p.min}"` : ""} ${p.max != null ? `max="${p.max}"` : ""}>`;
+      } else {
+        ctl = `<input id="${id}" name="${p.name}" type="${p.type === "password" ? "password" : "text"}"
+                value="${esc(p.default)}" placeholder="${esc(p.placeholder)}" ${req}>`;
+      }
+      d.innerHTML = `<label for="${id}">${esc(p.label)}${p.required ? " *" : ""}</label>${ctl}${p.help ? `<div class="hint">${esc(p.help)}</div>` : ""}`;
+      host.appendChild(d);
+    });
+  }
+
+  /* ---------------- results ---------------- */
+  let lastBlobUrl = null;
+  function clearResult() {
+    const m = $("msg"); m.className = "msg"; m.innerHTML = "";
+    $("out").style.display = "none"; $("out").textContent = "";
+    $("copy").style.display = "none";
+    if (lastBlobUrl) { URL.revokeObjectURL(lastBlobUrl); lastBlobUrl = null; }
+  }
+  function showErr(text) { const m = $("msg"); m.className = "msg err"; m.textContent = text; }
+
+  $("form").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    if (!current) return;
+    clearResult();
+    if (current.files_required && !files.length) return showErr("Please choose a file first.");
+    if (current.id === "compare" && files.length !== 2) return showErr("Select exactly two PDF files.");
+    for (const e of current.extra || []) {
+      if (e.required && !extraFiles[e.name]) return showErr("Missing: " + e.label);
+    }
+
+    const fd = new FormData();
+    files.forEach((f) => fd.append("files", f, f.name));
+    Object.entries(extraFiles).forEach(([k, f]) => f && fd.append(k, f, f.name));
+    new FormData($("form")).forEach((v, k) => { if (!(v instanceof File)) fd.append(k, v); });
+
+    const run = $("run");
+    run.disabled = true; run.classList.add("busy");
+    try {
+      const res = await fetch("/api/run/" + current.id, { method: "POST", body: fd });
+      const type = res.headers.get("content-type") || "";
+      if (type.includes("application/json")) {
+        const j = await res.json();
+        if (!res.ok || j.error) return showErr(j.error || "Something went wrong.");
+        $("out").textContent = j.text; $("out").style.display = "block";
+        $("copy").style.display = "inline-flex";
+        const m = $("msg"); m.className = "msg ok"; m.textContent = "Done.";
+        return;
+      }
+      if (!res.ok) return showErr("Server error (" + res.status + ").");
+      const cd = res.headers.get("content-disposition") || "";
+      const name = (/filename\*?=(?:UTF-8'')?"?([^";]+)"?/i.exec(cd) || [])[1] || "result";
+      const blob = await res.blob();
+      lastBlobUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = lastBlobUrl; a.download = decodeURIComponent(name);
+      document.body.appendChild(a); a.click(); a.remove();
+      const m = $("msg"); m.className = "msg ok";
+      m.innerHTML = `Done — <b>${esc(decodeURIComponent(name))}</b> (${fmtSize(blob.size)}). ` +
+                    `Download didn't start? <a href="${lastBlobUrl}" download="${esc(decodeURIComponent(name))}">Click here</a>.`;
+    } catch (err) {
+      showErr("Could not reach the server: " + err.message);
+    } finally {
+      run.disabled = false; run.classList.remove("busy");
+    }
+  });
+
+  $("reset").onclick = () => { files = []; extraFiles = {}; buildPrimary(); buildExtras(); buildFields(); clearResult(); };
+  $("copy").onclick = async () => {
+    try { await navigator.clipboard.writeText($("out").textContent); $("copy").textContent = "Copied ✓"; }
+    catch { $("copy").textContent = "Select the text and copy"; }
+    setTimeout(() => ($("copy").textContent = "Copy text"), 1500);
+  };
+  $("dClose").onclick = () => dlg.close();
+  dlg.addEventListener("click", (e) => { if (e.target === dlg) dlg.close(); });
+  dlg.addEventListener("close", clearResult);
+  $("q").addEventListener("input", (e) => render(e.target.value));
+
+  /* ---------------- boot ---------------- */
+  fetch("/api/tools").then((r) => r.json()).then((d) => { DATA = d; renderChips(); render(); })
+    .catch(() => { $("sections").innerHTML = '<p class="empty" style="display:block">Could not load tools from the server.</p>'; });
+})();
+</script>
+</body>
+</html>

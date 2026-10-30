@@ -1,0 +1,56 @@
+# Python bytecode and cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Test and coverage files
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+
+# Generated PDFs and temporary uploads
+uploads/*
+!uploads/.gitkeep
+
+outputs/*
+!outputs/.gitkeep
+
+temp/*
+!temp/.gitkeep
+
+# Operating system files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Build and packaging artifacts
+build/
+dist/
+*.egg-info/
+
+# Local database files
+instance/
+*.sqlite3
+*.db
