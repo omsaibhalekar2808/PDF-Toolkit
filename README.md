@@ -1,158 +1,224 @@
-# Python PDF Toolkit
+# 📄 PDF Toolkit
 
-A web-based PDF toolkit built with Python and Flask. The project brings common PDF processing operations together in one application.
+**A Python-based PDF Toolkit built with Flask to convert, edit, and manage PDF files through a simple web interface.**
 
-## Features
+🌐 **Live Website:** https://pdf-toolkit-kgkd.onrender.com
 
-- PDF processing and conversion tools supported by the application
-- Web interface powered by Flask and HTML templates
-- File upload handling and temporary-file processing
-- Configurable upload limits
-- Rate limiting and security-related application settings
-- Production entry point through WSGI
+💻 **GitHub Repository:** https://github.com/omsaibhalekar2808/PDF-Toolkit
 
-> **Note:** The available tools depend on the functions implemented in `pdf_tools.py`. Update this list to match the features that have been tested.
+---
 
-## Project Structure
+## 📌 About the Project
+
+PDF Toolkit is a web application developed using Python and Flask that brings multiple PDF-related tools together in one place. It provides a user-friendly interface for working with PDF documents and converting files between supported formats.
+
+The project is designed to make common document operations easier without requiring users to run individual Python scripts manually.
+
+## ✨ Features
+
+- 📄 PDF file processing and management
+- 🔄 PDF conversion tools
+- 📝 Document conversion support
+- 🖼️ Image and PDF-related operations
+- 📑 Document extraction and processing
+- 🌐 Web-based interface built with Flask
+- 🔒 Secret configuration through environment variables
+- 🚀 Online deployment using Render
+
+*Available operations depend on the tools implemented and configured in the application.*
+
+## 🛠️ Technologies Used
+
+- **Python** — application logic
+- **Flask** — web framework
+- **HTML and CSS** — user interface
+- **Gunicorn** — production WSGI server
+- **PyMuPDF** — PDF processing
+- **pypdf** — PDF manipulation
+- **Pillow** — image processing
+- **pdf2docx** — PDF-to-Word conversion
+- **python-docx** — Word document processing
+- **python-pptx** — PowerPoint document processing
+- **openpyxl** — Excel workbook processing
+- **pdfplumber** — PDF text and table extraction
+- **ReportLab** — PDF generation
+- **OCRmyPDF** — OCR-related PDF processing
+- **Render** — web application hosting
+- **Git and GitHub** — version control and source code hosting
+
+## 📂 Project Structure
 
 ```text
-github-project/
-├── .venv/                  # Local virtual environment (not committed)
-├── .env                    # Local secrets (not committed)
-├── .env.example            # Example configuration
+PDF-Toolkit/
+├── pdf_toolkit/
+│   ├── app.py
+│   ├── pdf_tools.py
+│   ├── wsgi.py
+│   ├── requirements.txt
+│   ├── .env.example
+│   └── templates/
+│       └── index.html
 ├── .gitignore
-├── README.md
-└── pdf_toolkit/
-    ├── app.py              # Flask application and routes
-    ├── pdf_tools.py        # PDF processing functions
-    ├── requirements.txt    # Python dependencies
-    ├── wsgi.py             # WSGI entry point
-    └── templates/          # HTML templates
+└── README.md
 ```
 
-## Requirements
-
-- Python 3.11
-- pip
-- The native libraries required by any PDF conversion dependencies, including WeasyPrint if enabled
-
-## Installation
+## ⚙️ Installation and Setup
 
 ### 1. Clone the repository
 
 ```bash
-git clone YOUR_GITHUB_REPOSITORY_URL
-cd YOUR_REPOSITORY_FOLDER
+git clone https://github.com/omsaibhalekar2808/PDF-Toolkit.git
 ```
 
-Replace the placeholders with your actual repository URL and folder name.
+### 2. Open the project folder
 
-### 2. Create a virtual environment
+```bash
+cd PDF-Toolkit/pdf_toolkit
+```
 
-**Windows PowerShell**
+### 3. Create a virtual environment
+
+**Windows:**
 
 ```powershell
 python -m venv .venv
-.\.venv\Scripts\Activate.ps1
 ```
 
-### 3. Install dependencies
+Activate it:
 
 ```powershell
-python -m pip install --upgrade pip
-python -m pip install -r .\pdf_toolkit\requirements.txt
+.venv\Scripts\Activate.ps1
 ```
 
-### 4. Configure environment variables
+If you use Command Prompt instead of PowerShell:
 
-Copy `.env.example` to `.env` and update the values for your local environment.
+```cmd
+.venv\Scripts\activate.bat
+```
 
-Do not commit `.env` or any real secret keys to GitHub.
+**macOS or Linux:**
 
-### 5. Start the application
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
 
-From the repository root:
+### 4. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 5. Configure environment variables
+
+Use `.env.example` as a reference for the environment variables required by your application.
+
+Set a secure `SECRET_KEY` before running the application. For example, in PowerShell:
 
 ```powershell
-python .\pdf_toolkit\app.py
+$env:SECRET_KEY = "replace-with-a-secure-random-value"
 ```
 
-Open the local URL printed in the terminal.
+Use your own secure value. Do not commit secret keys, passwords, API keys, or other credentials to GitHub.
 
-## Configuration
+### 6. Run the application
 
-Configure application settings using environment variables supported by the application.
+From the `pdf_toolkit` directory, run:
 
-For local development, use a `.env` file if the application is configured to load one. For production, set environment variables through your hosting provider.
+```bash
+python app.py
+```
 
-Keep debug mode disabled on public deployments.
-
-## WeasyPrint on Windows
-
-WeasyPrint requires compatible native libraries in addition to its Python packages. Installing the Python package alone may not be sufficient.
-
-Follow the official installation and troubleshooting instructions:
-
-https://doc.courtbouillon.org/weasyprint/stable/first_steps.html
-
-Do not rely on a machine-specific DLL path for deployment. Configure the native dependencies for the target operating system and hosting environment.
-
-## Production Deployment
-
-Use a production WSGI server supported by your hosting platform and point it to the application's WSGI entry point.
-
-For example, if `wsgi.py` is inside `pdf_toolkit/` and exports `app`:
+Open the local address displayed in the terminal, typically:
 
 ```text
-pdf_toolkit.wsgi:app
+http://127.0.0.1:5000
 ```
 
-Confirm the module path and exported variable match your actual code.
+## 🚀 Deployment
 
-Before exposing the application publicly:
+This project is deployed using Render.
 
-- Disable debug mode.
-- Set a strong secret key.
-- Configure request-size and rate limits.
-- Validate uploaded files and restrict accepted file types.
-- Store temporary files safely and clean them up.
-- Restrict remote URL fetching when converting HTML to PDF.
-- Test every conversion tool.
-- Review dependencies for known vulnerabilities.
-- Configure HTTPS and production logging.
+**Production website:** https://pdf-toolkit-kgkd.onrender.com
 
-## Security
+The deployment configuration uses:
 
-This project is intended to process user-provided documents. Treat uploaded files as untrusted input.
+- **Repository:** `omsaibhalekar2808/PDF-Toolkit`
+- **Branch:** `main`
+- **Root directory:** `pdf_toolkit`
+- **Build command:**
 
-Do not deploy publicly until file handling, access controls, resource limits, error handling, and PDF conversion dependencies have been tested.
-
-## Troubleshooting
-
-### Python imports fail in VS Code
-
-Select the project's `.venv` interpreter and reinstall dependencies using the project's `requirements.txt`.
-
-### WeasyPrint fails to load native libraries
-
-Follow the official Windows installation guide linked above and verify that the required native dependencies are available.
-
-### Dependency conflicts
-
-Run:
-
-```powershell
-python -m pip check
+```bash
+pip install -r requirements.txt
 ```
 
-## Contributing
+- **Start command:**
 
-Contributions and bug reports are welcome. Please include reproducible steps when reporting a problem. Avoid including private documents, secrets, or sensitive information in bug reports.
+```bash
+gunicorn wsgi:app
+```
 
-## License
+Set `SECRET_KEY` in the Render service's environment variables. Never put the actual secret value in this README or commit it to the repository.
 
-Choose a license before distributing this project. If you intend to publish it as open source, add the appropriate license file to the repository.
+## 📖 How to Use
 
-## Disclaimer
+1. Open the [PDF Toolkit website](https://pdf-toolkit-kgkd.onrender.com).
+2. Select an available PDF or document tool.
+3. Upload the file or files required by that tool.
+4. Choose the available processing or conversion options.
+5. Start the operation and wait for processing to finish.
+6. Download the resulting file if the selected tool provides one.
 
-This project is provided as-is. Test the application and its dependencies before using it with sensitive or important documents.
+The exact steps and supported file formats depend on the selected tool.
+
+## 🔐 Security and Privacy
+
+- Do not upload confidential or sensitive documents unless you understand how the application handles uploaded files.
+- Keep secret keys and API credentials out of source control.
+- Validate uploaded files and use reasonable file-size limits.
+- Configure temporary-file cleanup and access controls appropriately for production.
+- Review the privacy and data-handling behavior of the deployed application before using it for sensitive documents.
+
+## ⚠️ Important Notes
+
+- Some conversion tools may require additional system packages or external utilities.
+- Availability and performance may vary depending on the hosting environment and resource limits.
+- Free hosting services may temporarily sleep when inactive, so the first request after inactivity may take longer.
+- Not every PDF feature or file format is guaranteed to be supported.
+
+## 🔮 Future Improvements
+
+Potential improvements include:
+
+- Adding more PDF conversion tools
+- Improving the interface for mobile devices
+- Adding batch processing for supported operations
+- Improving error messages and validation
+- Adding progress indicators for long-running operations
+- Improving temporary-file cleanup and download handling
+
+## 🤝 Contributing
+
+Contributions, suggestions, and bug reports are welcome.
+
+1. Fork the repository.
+2. Create a new branch.
+3. Make your changes.
+4. Test your changes locally.
+5. Submit a pull request describing your improvements.
+
+## 📜 License
+
+No license has been specified yet. Unless a license is added to the repository, the project should not be assumed to permit unrestricted reuse, modification, or redistribution.
+
+## 👨‍💻 Author
+
+**Omsai Bhalekar**
+
+- GitHub: https://github.com/omsaibhalekar2808
+
+---
+
+⭐ If you find this project useful, consider starring the repository on GitHub.
+
+🌐 **Try the application:** https://pdf-toolkit-kgkd.onrender.com
